@@ -15,7 +15,8 @@ channelid = 822891962499596358
 xmltree = xml.etree.ElementTree.parse('things.txt')
 root = xmltree.getroot()
 print(root)
-tokens = root[0].text or ""
+tokens = list(root[0].attrib.values())[0]
+print(tokens)
 tokens = str(tokens)
 
 
