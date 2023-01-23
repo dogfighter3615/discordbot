@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "discordchat",
+  "version": "${version}",
+  "name": "Discordchat",
+  "description": "weeeeeeeeeeeeeeeeeeee",
+  "authors": ["Not you, don't get ideas"],
+  "contact": {},
+  "license": "MIT",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "discordchats.discordchat.client.DiscordchatClient"
+    ],
+    "main": [
+      "discordchats.discordchat.Discordchat"
+    ]
+  },
+  "mixins": [
+    "discordchat.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.10",
+    "fabric": "*",
+    "minecraft": "1.19.2"
+  }
+}
