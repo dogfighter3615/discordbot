@@ -2,19 +2,27 @@ import hikari
 import socket
 import threading
 import time
+import xml.etree.ElementTree
+from typing import Optional
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ip, port = "127.0.0.1", 25585
 tree, guild_id, stop, connected = None, 697699096731058247, False, False
-token = 'MTAzNjc0Mjc1OTI5OTY4NjUxMg.GsNOk7.EwVggeH0YfF6EQAm4hmrmx1DdWj_oP12rgK0uU'
 thread_minecraft = None
 channelid = 822891962499596358
-bot = hikari.GatewayBot(intents=hikari.Intents.ALL, token=token)
+
+
+xmltree = xml.etree.ElementTree.parse('things.txt')
+root = xmltree.getroot()
+print(root)
+tokens = root[0].text or ""
+tokens = str(tokens)
 
 
 # https://trello.com/b/vSETvt7c/mc-chat-mod
 
 
+bot = hikari.GatewayBot(intents=hikari.Intents.ALL, token=tokens)
 def minecraftthread():
     global client_socket, stop, connected
     client_socket.settimeout(3)
