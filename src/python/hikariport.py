@@ -20,7 +20,7 @@ tokens = str(tokens)
 
 
 
-bot = lightbulb.BotApp(intents=hikari.Intents.ALL, token=tokens)
+bot = lightbulb.BotApp(intents=hikari.Intents.ALL, token=tokens, default_enabled_guilds=guild_id)
 def minecraftthread():
     global client_socket, stop, connected
     client_socket.settimeout(3)
@@ -51,6 +51,14 @@ def discordbot():
     async def ping(event: hikari.GuildMessageCreateEvent) -> None:
         if event.is_human and event.channel_id == channelid:
             await event.message.respond(event.message.content)
+
+    @bot.command
+    @lightbulb.command("ping","checks if the bot is alive")
+    @lightbulb.implements(lightbulb.SlashCommand)
+    async def ping(ctx: lightbulb.Context) ->None:
+        if not ctx.author.is_bot:
+            await ctx.respond("pong")
+            print("pong")
 
     bot.run()
 
