@@ -2,14 +2,22 @@ import xml.etree.ElementTree as ET
 
 root = ET.Element("root")
 
-object1 = ET.SubElement(root, "object")
-object1.set("token", "put your token here without quotes")
+token = ET.SubElement(root, "object")
+token.set("token", "put your token here")
 
-object2 = ET.SubElement(root, "object")
-object2.set("trello", "")
+trello = ET.SubElement(root, "object")
+trello.set("trello", "")
+
+guild_id = ET.SubElement(root, "object")
+guild_id.set("guild_id", "")
+
+channel_id = ET.SubElement(root, "object")
+channel_id.set("channel_id", "")
 
 tree = ET.ElementTree(root)
 
 b_xml = ET.tostring(root)
 with open('things.txt', 'wb') as f:
     f.write(b_xml)
+
+print("done")

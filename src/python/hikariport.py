@@ -7,20 +7,20 @@ import lightbulb
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ip, port = "127.0.0.1", 25585
-tree, guild_id, stop, connected = None, 697699096731058247, False, False
+tree, stop, connected = None, False, False
 thread_minecraft = None
-channelid = 822891962499596358
-
 
 xmltree = xml.etree.ElementTree.parse('things.txt')
 root = xmltree.getroot()
 print(root)
-tokens = list(root[0].attrib.values())[0] or ""
-tokens = str(tokens)
+
+token = str(list(root[0].attrib.values())[0])
+guild_id =list(root[2].attrib.values())
+channelid = str(list(root[3].attrib.values())[0])
+
+bot = lightbulb.BotApp(intents=hikari.Intents.ALL, token=token, default_enabled_guilds=guild_id)
 
 
-
-bot = lightbulb.BotApp(intents=hikari.Intents.ALL, token=tokens, default_enabled_guilds=guild_id)
 def minecraftthread():
     global client_socket, stop, connected
     client_socket.settimeout(3)
@@ -53,9 +53,9 @@ def discordbot():
             await event.message.respond(event.message.content)
 
     @bot.command
-    @lightbulb.command("ping","checks if the bot is alive")
+    @lightbulb.command("ping", "checks if the bot is alive")
     @lightbulb.implements(lightbulb.SlashCommand)
-    async def ping(ctx: lightbulb.Context) ->None:
+    async def ping(ctx: lightbulb.Context) -> None:
         if not ctx.author.is_bot:
             await ctx.respond("pong")
             print("pong")
