@@ -45,10 +45,14 @@ def minecraftthread():
 
 
 def discordbot():
-    global bot, channelid
+    global bot
+    bot.run()
 
+
+def commands(bot):
     @bot.listen()
     async def ping(event: hikari.GuildMessageCreateEvent) -> None:
+        print(event.message.content)
         if event.is_human and event.channel_id == channelid:
             await event.message.respond(event.message.content)
 
@@ -60,13 +64,44 @@ def discordbot():
             await ctx.respond("pong")
             print("pong")
 
-    bot.run()
+    @lightbulb.add_checks(lightbulb.owner_only)
+    @bot.command()
+    @lightbulb.command("stop", "close the bot")
+    @lightbulb.implements(lightbulb.SlashCommand)
+    async def stop(ctx: lightbulb.Context) -> None:
+        await ctx.respond("stopping", flags=hikari.MessageFlag.EPHEMERAL)
+        await bot.close()
+
+    @lightbulb.add_checks(lightbulb.owner_only)
+    @bot.command()
+    @lightbulb.command("start", "start the minecraft connection")
+    @lightbulb.implements(lightbulb.SlashCommand)
+    async def start(ctx: lightbulb.context) -> None:
+        await ctx.respond("starting", flags=hikari.MessageFlag.EPHEMERAL)
+        pass
+
+    @lightbulb.add_checks(lightbulb.owner_only)
+    @bot.command()
+    @lightbulb.command("restart", "restarts the bot")
+    @lightbulb.implements(lightbulb.SlashCommand)
+    async def restart(ctx: lightbulb.SlashCommand) -> None:
+        await ctx.respond("restarting", flags=hikari.MessageFlag.EPHEMERAL)
+        await bot.close()
+        time.sleep(1)
+        main()
 
 
 def main():
-    discordbot()
-    pass
+    time.sleep(1)
+    thread_discord = threading.Thread(name="thread_discord", target=discordbot)
+    thread_discord.start()
+    thread_discord.join()
+
+
+def init():
+    commands(bot)
+    main()
 
 
 if __name__ == "__main__":
-    main()
+    init()
