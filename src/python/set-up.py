@@ -14,6 +14,10 @@ guild_id.set("guild_id", "")
 channel_id = ET.SubElement(root, "object")
 channel_id.set("channel_id", "")
 
+minecraft_ip = ET.SubElement(root, "minecraft_address")
+minecraft_ip.set("ip", "")
+minecraft_ip.set("port", "")
+
 tree = ET.ElementTree(root)
 
 b_xml = ET.tostring(root)

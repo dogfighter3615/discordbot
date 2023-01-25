@@ -6,7 +6,6 @@ import hikari
 import lightbulb
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ip, port = "127.0.0.1", 25585
 tree, stop, connected = None, False, False
 thread_minecraft = None
 
@@ -15,8 +14,11 @@ root = xmltree.getroot()
 print(root)
 
 token = str(list(root[0].attrib.values())[0])
-guild_id =list(root[2].attrib.values())
+guild_id = list(root[2].attrib.values())
 channelid = str(list(root[3].attrib.values())[0])
+ip = str(list(root[4].attrib.values())[0])
+port = int(list(root[4].attrib.values())[1])
+print(ip, port, channelid)
 
 bot = lightbulb.BotApp(intents=hikari.Intents.ALL, token=token, default_enabled_guilds=guild_id)
 
@@ -33,11 +35,15 @@ def minecraftthread():
         except:
             print("connection failed, trying again in 3 seconds")
             time.sleep(3)
+    print("connected")
     while connected and not stop:
         try:
-            print("connected")
+
             msg = client_socket.recv(2 ** 10)
             print("hi", msg)
+            message = await bot.rest.create_message(channelid, str(msg)).send()
+            print(message)
+            #await sendmessage(msg)
             msg = None
         except:
             # print("failed to recieve message")
@@ -47,6 +53,7 @@ def minecraftthread():
 def discordbot():
     global bot
     bot.run()
+
 
 
 def commands(bot):
@@ -69,6 +76,9 @@ def commands(bot):
     @lightbulb.command("stop", "close the bot")
     @lightbulb.implements(lightbulb.SlashCommand)
     async def stop(ctx: lightbulb.Context) -> None:
+        global stop
+        stop = True
+        thread_minecraft.join()
         await ctx.respond("stopping", flags=hikari.MessageFlag.EPHEMERAL)
         await bot.close()
 
@@ -78,20 +88,28 @@ def commands(bot):
     @lightbulb.implements(lightbulb.SlashCommand)
     async def start(ctx: lightbulb.context) -> None:
         await ctx.respond("starting", flags=hikari.MessageFlag.EPHEMERAL)
-        pass
+        global thread_minecraft
+        thread_minecraft.start()
 
     @lightbulb.add_checks(lightbulb.owner_only)
     @bot.command()
     @lightbulb.command("restart", "restarts the bot")
     @lightbulb.implements(lightbulb.SlashCommand)
     async def restart(ctx: lightbulb.SlashCommand) -> None:
+        await ctx.respond("waiting for minecraft thread connection to close", flags=hikari.MessageFlag.EPHEMERAL)
+        global stop
+        stop = True
+        thread_minecraft.join()
         await ctx.respond("restarting", flags=hikari.MessageFlag.EPHEMERAL)
         await bot.close()
         time.sleep(1)
-        main()
+        await main()
 
 
 def main():
+    global stop, thread_minecraft
+    stop = False
+    thread_minecraft = threading.Thread(name="thread_minecraft", target=minecraftthread)
     time.sleep(1)
     thread_discord = threading.Thread(name="thread_discord", target=discordbot)
     thread_discord.start()
