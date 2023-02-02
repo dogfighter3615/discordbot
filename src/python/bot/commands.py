@@ -1,17 +1,10 @@
-from xml.etree.ElementTree import ElementTree
-
-import lightbulb
-import hikari
-from lightbulb import BotApp
-
-import main
+import threading
 import time
 from global_vars import *
+from src.python.bot import global_vars, minecraft_listener_thread
 
 
 def initcommands():
-    root = xmltree.getroot()
-
     @bot.listen()
     async def ping(event: hikari.GuildMessageCreateEvent) -> None:
         print(event.message.content)
@@ -31,8 +24,7 @@ def initcommands():
     @bot.command()
     @lightbulb.command("stop", "close the bot")
     @lightbulb.implements(lightbulb.SlashCommand)
-    async def stop(ctx: lightbulb.Context) -> None:
-        global stop
+    async def stop_bot(ctx: lightbulb.Context) -> None:
         stop = True
         await ctx.respond("stopping", flags=hikari.MessageFlag.EPHEMERAL)
         await bot.close()
@@ -43,8 +35,10 @@ def initcommands():
     @lightbulb.implements(lightbulb.SlashCommand)
     async def start(ctx: lightbulb.context) -> None:
         await ctx.respond("starting", flags=hikari.MessageFlag.EPHEMERAL)
-        await hikariport.minecraft_connect()
-        hikariport.task.send_mc_chat.start()
+        await main.minecraft_connect()
+        minecraft_thread = threading.Thread(name="minecraft_thread", target=minecraft_listener_thread.receive)
+        minecraft_thread.start()
+        main.task.send_mc_chat.start()
 
     @lightbulb.add_checks(lightbulb.owner_only)
     @bot.command()
@@ -53,14 +47,13 @@ def initcommands():
     async def restart(ctx: lightbulb.SlashCommand) -> None:
         try:
             await ctx.respond("waiting for minecraft thread connection to close", flags=hikari.MessageFlag.EPHEMERAL)
-            global stop
-            stop = True
+            global_vars.stop = True
         except:
             pass
         await ctx.respond("restarting", flags=hikari.MessageFlag.EPHEMERAL)
         await bot.close()
         time.sleep(1)
-        await hikariport.main()
+        await main.main()
 
     @lightbulb.add_checks(lightbulb.owner_only)
     @lightbulb.option("channelid", "channel id to change to")
@@ -69,14 +62,20 @@ def initcommands():
     @lightbulb.implements(lightbulb.SlashCommand)
     async def change_channel(ctx: lightbulb.Context):
         await ctx.respond(f"changed channel to {ctx.options.channelid}")
-        global channelid
-        channelid = ctx.options.channelid
+        channelid = int(ctx.options.channelid)
         root[3].set("channel_id", str(channelid))
-        xmltree.write("things.txt")
+        xmltree.write("things.xml")
 
     @bot.command()
     @lightbulb.command(name="sayhi", description="say hi a lot of times")
     @lightbulb.implements(lightbulb.SlashCommand)
     async def sayhi(ctx: lightbulb.Context):
-        await ctx.respond("hi")
+        await ctx.respond(f"hi, {channelid}")
         task.say_hi.start()
+
+    @bot.command()
+    @lightbulb.command(name="stopsayhi", description="say hi a lot of times")
+    @lightbulb.implements(lightbulb.SlashCommand)
+    async def stopsayhi(ctx: lightbulb.Context):
+        await ctx.respond("hi")
+        task.say_hi.stop()

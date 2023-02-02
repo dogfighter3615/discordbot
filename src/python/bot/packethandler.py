@@ -1,6 +1,5 @@
-import main
+from global_vars import *
 
 
-def recieve():
-
-    pass
+def unpack(data: str) -> list:
+    return [data]

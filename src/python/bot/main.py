@@ -1,11 +1,12 @@
 import socket
 import threading
 import time
-from lightbulb.ext import tasks
-import datetime
 import commands
+from src.python.bot import global_vars
 from global_vars import * #tree, task, ip, port, root, xmltree, channelid, bot, stop, msg, connected, guild_id, \
-    #client_socket
+
+
+#client_socket
 
 
 #class taskclass():
@@ -29,13 +30,13 @@ from global_vars import * #tree, task, ip, port, root, xmltree, channelid, bot, 
 
 
 async def minecraft_connect():
-    client_socket.settimeout(3)
+    global_vars.client_socket.settimeout(3)
     while not connected and not stop:
         print(threading.current_thread(), threading.activeCount(), threading.enumerate())
         try:
             print("attempting connection!")
             client_socket.connect((ip, port))
-            connected = True
+            global_vars.connected = True
         except:
             print("connection failed, trying again in 3 seconds")
             time.sleep(3)
@@ -53,16 +54,7 @@ def minecraft_recieve_message():
         pass
 
 
-def minecraft_message_handler(msg: str) -> str:
-    if msg.startswith("p"):
-        msg = msg[1:]
-        return msg
-    else:
-        return None
-
-
 def discordbot():
-    global bot
     bot.run()
 
 

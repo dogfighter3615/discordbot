@@ -21,7 +21,7 @@ minecraft_ip.set("port", "")
 tree = ET.ElementTree(root)
 
 b_xml = ET.tostring(root)
-with open('bot/things.txt', 'wb') as f:
+with open('bot/things.xml', 'wb') as f:
     f.write(b_xml)
 
 print("done")
