@@ -3,6 +3,8 @@ import main
 import time
 import datetime
 
+from src.python.bot import global_vars
+
 
 class taskclass():
     def __init__(self, bot, channelid, msg):

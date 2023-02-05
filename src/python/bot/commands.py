@@ -1,5 +1,9 @@
+import subprocess
 import threading
 import time
+
+import lightbulb
+
 from global_vars import *
 from src.python.bot import global_vars, minecraft_listener_thread
 
@@ -36,9 +40,10 @@ def initcommands():
     async def start(ctx: lightbulb.context) -> None:
         await ctx.respond("starting", flags=hikari.MessageFlag.EPHEMERAL)
         await main.minecraft_connect()
-        minecraft_thread = threading.Thread(name="minecraft_thread", target=minecraft_listener_thread.receive)
-        minecraft_thread.start()
-        main.task.send_mc_chat.start()
+        if connected:
+            minecraft_thread = threading.Thread(name="minecraft_thread", target=minecraft_listener_thread.listen)
+            minecraft_thread.start()
+            main.task.send_mc_chat.start()
 
     @lightbulb.add_checks(lightbulb.owner_only)
     @bot.command()
@@ -79,3 +84,13 @@ def initcommands():
     async def stopsayhi(ctx: lightbulb.Context):
         await ctx.respond("hi")
         task.say_hi.stop()
+
+    @bot.command()
+    @lightbulb.command(name="pi-temp", description="return the temperature of the pi")
+    @lightbulb.implements(lightbulb.SlashCommand)
+    async def pitemp(ctx: lightbulb.Context):
+        try:
+            temp = subprocess.run(["vcgencmd", "measure_temp"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            await ctx.respond(temp.stdout.decode())
+        except:
+            await ctx.respond("failed to fetch the temperature")

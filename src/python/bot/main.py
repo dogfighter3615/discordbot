@@ -31,16 +31,23 @@ from global_vars import * #tree, task, ip, port, root, xmltree, channelid, bot, 
 
 async def minecraft_connect():
     global_vars.client_socket.settimeout(3)
-    while not connected and not stop:
+    failure = 0
+    while not global_vars.connected and not global_vars.stop and not failure >= 10:
         print(threading.current_thread(), threading.activeCount(), threading.enumerate())
         try:
             print("attempting connection!")
             client_socket.connect((ip, port))
             global_vars.connected = True
         except:
-            print("connection failed, trying again in 3 seconds")
+            print(f"connection failed, trying again in 3 seconds, {10-failure} tries left")
+            failure += 1
             time.sleep(3)
-    print("connected")
+
+    if global_vars.connected:
+        print("connected")
+
+    elif failure >= 10:
+        print("failed to connect try again")
 
 
 def minecraft_recieve_message():
@@ -59,8 +66,7 @@ def discordbot():
 
 
 def main():
-    global stop
-    stop = False
+    global_vars.stop = False
     time.sleep(1)
     thread_discord = threading.Thread(name="thread_discord", target=discordbot)
     thread_discord.start()
